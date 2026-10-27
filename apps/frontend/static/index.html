@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Ops Platform</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0b0c10; color: #c5c6c7; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 1.5rem; }
+    h1 { color: #66fcf1; font-size: 2rem; }
+    .card { border: 1px solid #1f2833; padding: 2rem; border-radius: 12px; background: #121217; text-align: center; width: 90%; max-width: 420px; }
+    .status { margin-top: 1rem; font-size: 0.9rem; color: #45a29e; }
+    .btn { margin-top: 1rem; padding: 0.6rem 1.2rem; background: #66fcf1; color: #0b0c10; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .btn:hover { background: #45a29e; }
+  </style>
+</head>
+<body>
+  <h1>AI Ops Platform</h1>
+  <div class="card">
+    <h2>Frontend</h2>
+    <p class="status" id="status">checking API...</p>
+    <button class="btn" onclick="check()">Refresh Status</button>
+  </div>
+  <script>
+    async function check() {
+      const el = document.getElementById('status');
+      try {
+        const r = await fetch('/api/health');
+        const j = await r.json();
+        el.textContent = `API: ${j.status} | ${j.message}`;
+        el.style.color = '#45a29e';
+      } catch (e) {
+        el.textContent = 'API unreachable';
+        el.style.color = '#ff6b6b';
+      }
+    }
+    check();
+    setInterval(check, 10000);
+  </script>
+</body>
+</html>

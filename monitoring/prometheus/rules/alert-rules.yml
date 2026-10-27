@@ -1,0 +1,43 @@
+groups:
+  - name: aiops.rules
+    rules:
+      # --- App availability -------------------------------------------------
+      - alert: AppDown
+        expr: up{job="aiops-services"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "App {{ $labels.instance }} is down"
+          description: "The target {{ $labels.instance }} has been down for more than 1 minute."
+
+      # --- Pod restarts / OOM ----------------------------------------------
+      - alert: PodOOMKilled
+        expr: increase(kube_pod_container_status_restarts_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod {{ $labels.pod }} restarted (possible OOMKilled)"
+          description: |
+            Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has restarted
+            within the last 5m. Check logs for OOMKilled.
+
+      - alert: HighMemoryUsage
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) > 0.85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.pod }}"
+          description: "Memory usage is above 85% of the limit for {{ $labels.pod }}."
+
+      # --- Crash loop --------------------------------------------------------
+      - alert: CrashLoop
+        expr: rate(kube_pod_container_status_restarts_total[10m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CrashLoopBackOff on {{ $labels.pod }}"
+          description: "Pod {{ $labels.pod }} is crash looping."

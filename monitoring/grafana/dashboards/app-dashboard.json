@@ -1,0 +1,61 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "AI Ops Platform",
+    "tags": ["aiops"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "type": "stat",
+        "title": "API Up?",
+        "targets": [
+          {
+            "expr": "up{job=\"aiops-services\",instance=\"api.aiops.svc:80\"}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"options": {"0": {"text": "DOWN", "color": "red"}, "1": {"text": "UP", "color": "green"}}}
+            ],
+            "unit": "short"
+          }
+        },
+        "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4}
+      },
+      {
+        "type": "stat",
+        "title": "Frontend Up?",
+        "targets": [
+          {
+            "expr": "up{job=\"aiops-services\",instance=\"frontend.aiops.svc:80\"}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"options": {"0": {"text": "DOWN", "color": "red"}, "1": {"text": "UP", "color": "green"}}}
+            ]
+          }
+        },
+        "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4}
+      },
+      {
+        "type": "graph",
+        "title": "API Restarts (5m)",
+        "targets": [
+          {
+            "expr": "increase(kube_pod_container_status_restarts_total{container=\"api\"}[5m])",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"x": 0, "y": 4, "w": 12, "h": 6}
+      }
+    ]
+  }
+}

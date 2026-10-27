@@ -1,0 +1,38 @@
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: 'localhost:25'
+  smtp_from: 'alertmanager@local'
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'aiops-webhook'
+  routes:
+    - receiver: 'on-call'
+      match:
+        severity: critical
+
+receivers:
+  - name: 'aiops-webhook'
+    webhook_configs:
+      - url: http://aiops-assistant.aiops.svc:8000/alertwebhook
+        send_resolved: true
+
+  - name: 'on-call'
+    email_configs:
+      - to: on-call@example.com
+        smarthost: smtp.example.com:587
+        from: alertmanager@example.com
+        auth_username: alertmanager
+        # auth_password: <your-smtp-password>  # set via secret at deploy time
+    webhook_configs:
+      - url: http://aiops-assistant.aiops.svc:8000/alertwebhook
+
+inhibit_rules:
+  - source_match:
+      severity: critical
+    target_match:
+      severity: warning
+    equal: ['alertname', 'cluster']
